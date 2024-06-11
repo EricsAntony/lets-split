@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"expense/pkg/models"
 	"log"
 	"net/http"
 	"os"
@@ -9,8 +10,10 @@ import (
 )
 
 type templateData struct {
-	Flash string
-	Error map[string]string
+	Flash    string
+	Error    map[string]string
+	UserId   int
+	UserList []*models.User
 }
 
 // LogFiles opens the log files and return them.
@@ -42,7 +45,7 @@ func openDB(dsn string) (*sql.DB, error) {
 // render function displays the page.
 func (app *Application) render(w http.ResponseWriter, files []string, td *templateData) {
 	ts, errParsingFiles := template.ParseFiles(files...)
-log.Println(ts)
+
 	//  checking for any error
 	if errParsingFiles != nil {
 		app.ErrorLog.Println(errParsingFiles)
@@ -59,6 +62,11 @@ log.Println(ts)
 		http.Error(w, "Internal Server error", 500)
 		return
 	}
-	log.Println("dsdas")
+}
 
+// AutenticatedUser checks whether the user is authenticated or not.
+// Redirects to login page if the user is not authenticated.
+func (app *Application) AuthenticatedUser(r *http.Request) bool {
+	loggedId := app.Session.GetInt(r, "userId")
+	return loggedId != 0
 }

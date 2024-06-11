@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expense/pkg/models/mysql"
 	"flag"
 	"log"
 	"net/http"
@@ -23,6 +24,7 @@ type Application struct {
 	InfoLog  *log.Logger
 	ErrorLog *log.Logger
 	Session  *sessions.Session
+	User     *mysql.UserModel
 }
 
 func main() {
@@ -31,7 +33,7 @@ func main() {
 	// Set default configuration.
 	flag.StringVar(&config.Addr, "addr", ":4000", "Default port to listen on")
 	flag.StringVar(&config.StaticDir, "staticDir", "./ui/static", "Directory to serve static files from")
-	flag.StringVar(&config.Dsn, "dsn", "root:root@/todo?parseTime=true", "MysqlServer connection")
+	flag.StringVar(&config.Dsn, "dsn", "root:root@/expensetracker?parseTime=true", "MysqlServer connection")
 	flag.Parse()
 
 	// initialize the loggers.
@@ -55,8 +57,9 @@ func main() {
 		Config:   config,
 		InfoLog:  infoLog,
 		ErrorLog: errorLog,
-		Session: session,
+		Session:  session,
+		User:     &mysql.UserModel{DB: db},
 	}
-
+	log.Println("dalksjdlkasd")
 	errorLog.Fatal(http.ListenAndServe(app.Config.Addr, app.routes()))
 }
